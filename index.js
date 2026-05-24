@@ -10,7 +10,11 @@ const {
   SlashCommandBuilder,
   REST,
   Routes,
-  PermissionFlagsBits
+  PermissionFlagsBits,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  ChannelType
 } = require('discord.js');
 
 const client = new Client({
@@ -25,8 +29,15 @@ const commands = [
     .setName('painel-beneficios')
     .setDescription('Envia o painel de benefícios da Noctra Core')
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
-  
+    .addChannelOption(option =>
+      option
+        .setName('canal')
+        .setDescription('Canal onde o painel será enviado')
+        .addChannelTypes(ChannelType.GuildText)
+        .setRequired(false)
+    )
 ].map(command => command.toJSON());
+
 client.once('clientReady', async () => {
   console.log(`🌙 ${client.user.tag} está online!`);
 
@@ -64,23 +75,32 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
   const cargoBooster = newMember.guild.roles.cache.get(process.env.BOOSTER_ROLE_ID);
   const cargoVip = newMember.guild.roles.cache.get(process.env.VIP_ROLE_ID);
 
-  // Quando a pessoa começa a boostar
   if (!antesBoostava && agoraBoosta) {
     if (cargoBooster) await newMember.roles.add(cargoBooster).catch(() => {});
     if (cargoVip) await newMember.roles.add(cargoVip).catch(() => {});
 
     const embed = new EmbedBuilder()
       .setColor('#8b5cf6')
+      .setAuthor({
+        name: 'Novo Boost na Noctra Core',
+        iconURL: newMember.user.displayAvatarURL({ size: 1024 })
+      })
       .setTitle('☾ A Noctra foi fortalecida')
       .setDescription(
-        `${newMember} acabou de impulsionar a **Noctra Core**.\n\n` +
-        `A escuridão reconheceu sua contribuição e seus benefícios foram liberados.\n\n` +
-        `✦ Cargo Booster Noctra\n` +
-        `✦ Cargo VIP Noctra\n` +
-        `✦ Acesso a canais especiais\n` +
-        `✦ Prioridade em pedidos\n` +
-        `✦ Participação em sorteios futuros\n\n` +
-        `Obrigada por apoiar a Noctra. 🌙`
+        `${newMember} impulsionou a **Noctra Core**.\n\n` +
+        `A Umbra reconheceu sua contribuição e liberou seus benefícios especiais.`
+      )
+      .addFields(
+        {
+          name: '✦ Benefícios liberados',
+          value:
+            `${cargoBooster ? `${cargoBooster}` : 'Cargo Booster Noctra'}\n` +
+            `${cargoVip ? `${cargoVip}` : 'Cargo VIP Noctra'}\n` +
+            `Acesso a canais especiais\n` +
+            `Prioridade em pedidos\n` +
+            `Participação em sorteios futuros`,
+          inline: false
+        }
       )
       .setThumbnail(newMember.user.displayAvatarURL({ size: 1024 }))
       .setFooter({
@@ -90,7 +110,7 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
 
     if (canalBoost) {
       await canalBoost.send({
-        content: `🌙 ${newMember} obrigada pelo boost!`,
+        content: `🌙 ${newMember}, obrigada pelo boost!`,
         embeds: [embed]
       });
     }
@@ -113,7 +133,6 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
     return;
   }
 
-  // Quando a pessoa para de boostar
   if (antesBoostava && !agoraBoosta) {
     if (cargoBooster) await newMember.roles.remove(cargoBooster).catch(() => {});
     if (cargoVip) await newMember.roles.remove(cargoVip).catch(() => {});
@@ -136,49 +155,114 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
     return;
   }
 });
+
 client.on('interactionCreate', async (interaction) => {
-  if (!interaction.isChatInputCommand()) return;
+  if (interaction.isChatInputCommand()) {
+    if (interaction.commandName === 'painel-beneficios') {
+      const canalEscolhido = interaction.options.getChannel('canal') || interaction.channel;
 
-  if (interaction.commandName === 'painel-beneficios') {
-    const embed = new EmbedBuilder()
-      .setColor('#8b5cf6')
-      .setTitle('☾ Benefícios da Noctra Core')
-      .setDescription(
-        `Impulsione a **Noctra Core** e ajude nossa comunidade a crescer.\n\n` +
-        `Ao apoiar o servidor com boost, você desbloqueia benefícios especiais dentro da comunidade.`
-      )
-      .addFields(
-        {
-          name: '✦ Benefícios',
-          value:
-            `🌙 Cargo especial de Booster\n` +
-            `✨ Acesso VIP Noctra\n` +
-            `🎁 Participação em sorteios\n` +
-            `📖 Prioridade em pedidos\n` +
-            `🖤 Acesso a canais exclusivos`,
-          inline: false
-        },
-        {
-          name: '☾ Como resgatar',
-          value:
-            `Após impulsionar o servidor, a **Umbra** libera seus benefícios automaticamente.\n\n` +
-            `Caso algo não apareça, abra um ticket para a staff verificar.`,
-          inline: false
-        }
-      )
-      .setFooter({
-        text: 'Umbra • Sistema de Benefícios da Noctra Core'
-      })
-      .setTimestamp();
+      const cargoBooster = interaction.guild.roles.cache.get(process.env.BOOSTER_ROLE_ID);
+      const cargoVip = interaction.guild.roles.cache.get(process.env.VIP_ROLE_ID);
 
-    await interaction.channel.send({
-      embeds: [embed]
-    });
+      const embed = new EmbedBuilder()
+        .setColor('#8b5cf6')
+        .setTitle('☾ Benefícios da Noctra Core')
+        .setDescription(
+          `Impulsione a **Noctra Core** e ajude nossa comunidade a crescer.\n\n` +
+          `Quem apoia o servidor recebe benefícios especiais, cargos exclusivos e acesso a vantagens dentro da comunidade.`
+        )
+        .addFields(
+          {
+            name: '✦ Benefícios de Booster',
+            value:
+              `🌙 ${cargoBooster ? `${cargoBooster}` : 'Cargo especial de Booster'}\n` +
+              `✨ ${cargoVip ? `${cargoVip}` : 'Acesso VIP Noctra'}\n` +
+              `🎁 Participação em sorteios\n` +
+              `📖 Prioridade em pedidos\n` +
+              `🖤 Acesso a canais exclusivos`,
+            inline: false
+          },
+          {
+            name: '☾ Como funciona',
+            value:
+              `Depois de impulsionar o servidor, a **Umbra** entrega seus benefícios automaticamente.\n\n` +
+              `Se algo não aparecer, abra um ticket para a staff verificar.`,
+            inline: false
+          },
+          {
+            name: '✦ Observação',
+            value:
+              `Os benefícios ficam ativos enquanto o boost estiver ativo no servidor.`,
+            inline: false
+          }
+        )
+        .setFooter({
+          text: 'Umbra • Sistema de Benefícios da Noctra Core'
+        })
+        .setTimestamp();
 
-    await interaction.reply({
-      content: 'Painel de benefícios enviado.',
-      ephemeral: true
-    });
+      const botoes = new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+          .setCustomId('beneficios_ver')
+          .setLabel('Ver benefícios')
+          .setEmoji('🌙')
+          .setStyle(ButtonStyle.Secondary),
+
+        new ButtonBuilder()
+          .setCustomId('beneficios_resgatar')
+          .setLabel('Como resgatar')
+          .setEmoji('✨')
+          .setStyle(ButtonStyle.Primary),
+
+        new ButtonBuilder()
+          .setCustomId('beneficios_duvidas')
+          .setLabel('Dúvidas')
+          .setEmoji('🖤')
+          .setStyle(ButtonStyle.Secondary)
+      );
+
+      await canalEscolhido.send({
+        embeds: [embed],
+        components: [botoes]
+      });
+
+      await interaction.reply({
+        content: `Painel de benefícios enviado em ${canalEscolhido}.`,
+        ephemeral: true
+      });
+    }
+  }
+
+  if (interaction.isButton()) {
+    if (interaction.customId === 'beneficios_ver') {
+      await interaction.reply({
+        content:
+          `☾ **Benefícios de Booster da Noctra Core**\n\n` +
+          `🌙 Cargo especial de Booster\n` +
+          `✨ Cargo VIP Noctra\n` +
+          `🎁 Sorteios futuros\n` +
+          `📖 Prioridade em pedidos\n` +
+          `🖤 Canais exclusivos`,
+        ephemeral: true
+      });
+    }
+
+    if (interaction.customId === 'beneficios_resgatar') {
+      await interaction.reply({
+        content:
+          `☾ Após impulsionar o servidor, a **Umbra** tenta entregar seus cargos automaticamente.\n\n` +
+          `Se os cargos não aparecerem, abra um ticket e envie um print do boost para a staff verificar.`,
+        ephemeral: true
+      });
+    }
+
+    if (interaction.customId === 'beneficios_duvidas') {
+      await interaction.reply({
+        content:
+          `☾ Caso tenha dúvidas sobre os benefícios, fale com a staff ou abra um ticket no servidor.`,
+        ephemeral: true
+      });
+    }
   }
 });
 
