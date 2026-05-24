@@ -6,7 +6,11 @@ const {
   Client,
   GatewayIntentBits,
   EmbedBuilder,
-  ActivityType
+  ActivityType,
+  SlashCommandBuilder,
+  REST,
+  Routes,
+  PermissionFlagsBits
 } = require('discord.js');
 
 const client = new Client({
@@ -16,7 +20,14 @@ const client = new Client({
   ]
 });
 
-client.once('clientReady', () => {
+const commands = [
+  new SlashCommandBuilder()
+    .setName('painel-beneficios')
+    .setDescription('Envia o painel de benefícios da Noctra Core')
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
+  
+].map(command => command.toJSON());
+client.once('clientReady', async () => {
   console.log(`🌙 ${client.user.tag} está online!`);
 
   client.user.setPresence({
@@ -28,6 +39,19 @@ client.once('clientReady', () => {
     ],
     status: 'online'
   });
+
+  const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
+
+  try {
+    await rest.put(
+      Routes.applicationCommands(client.user.id),
+      { body: commands }
+    );
+
+    console.log('🌙 Comandos da Umbra registrados!');
+  } catch (error) {
+    console.log('Erro ao registrar comandos:', error);
+  }
 });
 
 client.on('guildMemberUpdate', async (oldMember, newMember) => {
@@ -110,6 +134,51 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
     ).catch(() => {});
 
     return;
+  }
+});
+client.on('interactionCreate', async (interaction) => {
+  if (!interaction.isChatInputCommand()) return;
+
+  if (interaction.commandName === 'painel-beneficios') {
+    const embed = new EmbedBuilder()
+      .setColor('#8b5cf6')
+      .setTitle('☾ Benefícios da Noctra Core')
+      .setDescription(
+        `Impulsione a **Noctra Core** e ajude nossa comunidade a crescer.\n\n` +
+        `Ao apoiar o servidor com boost, você desbloqueia benefícios especiais dentro da comunidade.`
+      )
+      .addFields(
+        {
+          name: '✦ Benefícios',
+          value:
+            `🌙 Cargo especial de Booster\n` +
+            `✨ Acesso VIP Noctra\n` +
+            `🎁 Participação em sorteios\n` +
+            `📖 Prioridade em pedidos\n` +
+            `🖤 Acesso a canais exclusivos`,
+          inline: false
+        },
+        {
+          name: '☾ Como resgatar',
+          value:
+            `Após impulsionar o servidor, a **Umbra** libera seus benefícios automaticamente.\n\n` +
+            `Caso algo não apareça, abra um ticket para a staff verificar.`,
+          inline: false
+        }
+      )
+      .setFooter({
+        text: 'Umbra • Sistema de Benefícios da Noctra Core'
+      })
+      .setTimestamp();
+
+    await interaction.channel.send({
+      embeds: [embed]
+    });
+
+    await interaction.reply({
+      content: 'Painel de benefícios enviado.',
+      ephemeral: true
+    });
   }
 });
 
