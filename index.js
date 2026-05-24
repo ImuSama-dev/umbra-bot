@@ -36,21 +36,6 @@ const commands = [
         .addChannelTypes(ChannelType.GuildText)
         .setRequired(false)
     )
-].map(command => command.toJSON());
-
-client.once('clientReady', async () => {
-  console.log(`🌙 ${client.user.tag} está online!`);
-
-  client.user.setPresence({
-    activities: [
-      {
-        name: 'os benefícios da Noctra Core',
-        type: ActivityType.Watching
-      }
-    ],
-    status: 'online'
-  });
-
   const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
 
   try {
@@ -63,6 +48,10 @@ client.once('clientReady', async () => {
   } catch (error) {
     console.log('Erro ao registrar comandos:', error);
   }
+new SlashCommandBuilder()
+  .setName('teste-boost')
+  .setDescription('Testa o sistema de boost da Umbra')
+  .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
 });
 
 client.on('guildMemberUpdate', async (oldMember, newMember) => {
@@ -157,6 +146,67 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
 });
 
 client.on('interactionCreate', async (interaction) => {
+  if (interaction.commandName === 'teste-boost') {
+  const membro = interaction.member;
+
+  const canalBoost = interaction.guild.channels.cache.get(process.env.BOOST_CHANNEL_ID);
+  const canalLogs = interaction.guild.channels.cache.get(process.env.LOG_CHANNEL_ID);
+
+  const cargoBooster = interaction.guild.roles.cache.get(process.env.BOOSTER_ROLE_ID);
+  const cargoVip = interaction.guild.roles.cache.get(process.env.VIP_ROLE_ID);
+  const cargoApoiador = interaction.guild.roles.cache.get(process.env.APOIADOR_ROLE_ID);
+
+  if (cargoBooster) await membro.roles.add(cargoBooster).catch(() => {});
+  if (cargoVip) await membro.roles.add(cargoVip).catch(() => {});
+  if (cargoApoiador) await membro.roles.add(cargoApoiador).catch(() => {});
+
+  const embed = new EmbedBuilder()
+    .setColor('#8b5cf6')
+    .setTitle('☾ Teste de Boost realizado')
+    .setDescription(
+      `${membro} simulou um boost na **Noctra Core**.\n\n` +
+      `A Umbra entregou os benefícios de teste com sucesso.`
+    )
+    .addFields({
+      name: '✦ Cargos entregues',
+      value:
+        `${cargoBooster ? cargoBooster : 'Booster não encontrado'}\n` +
+        `${cargoVip ? cargoVip : 'VIP não encontrado'}\n` +
+        `${cargoApoiador ? cargoApoiador : 'Apoiador não encontrado'}`,
+      inline: false
+    })
+    .setThumbnail(interaction.user.displayAvatarURL({ size: 1024 }))
+    .setFooter({ text: 'Umbra • Teste do Sistema de Boost' })
+    .setTimestamp();
+
+  if (canalBoost) {
+    await canalBoost.send({
+      content: `🌙 Teste de boost realizado por ${membro}.`,
+      embeds: [embed]
+    });
+  }
+
+  if (canalLogs) {
+    await canalLogs.send({
+      embeds: [
+        new EmbedBuilder()
+          .setColor('#22c55e')
+          .setTitle('☾ Log de teste de boost')
+          .setDescription(
+            `Um teste de boost foi executado.\n\n` +
+            `✦ Membro: ${membro}\n` +
+            `✦ Resultado: cargos entregues com sucesso.`
+          )
+          .setTimestamp()
+      ]
+    });
+  }
+
+  await interaction.reply({
+    content: '☾ Teste de boost concluído. Verifique os cargos, o canal de boost e o canal de logs.',
+    ephemeral: true
+  });
+}
   if (interaction.isChatInputCommand()) {
     if (interaction.commandName === 'painel-beneficios') {
       const canalEscolhido = interaction.options.getChannel('canal') || interaction.channel;
