@@ -144,20 +144,44 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
           new EmbedBuilder()
             .setColor('#22c55e')
             .setTitle('☾ Novo boost detectado')
-            .setDescription(
-              `✦ Membro: ${newMember}\n` +
-              `✦ Cargos entregues: Booster, VIP e Círculo da Umbra`
-            )
+.setDescription(
+  `✦ Membro: ${newMember}\n` +
+  `✦ ID: ${newMember.id}\n` +
+  `✦ Usuário: ${newMember.user.tag}\n` +
+  `✦ Boost detectado com sucesso\n` +
+  `✦ Cargos entregues: Booster, VIP e Círculo da Umbra`
+)
+.setThumbnail(newMember.user.displayAvatarURL({ size: 1024 }))
+.setFooter({ text: 'Umbra • Logs de Boost' })
             .setTimestamp()
         ]
       });
     }
 
-    await newMember.send(
-      `☾ A escuridão reconheceu sua contribuição.\n\n` +
-      `Obrigada por impulsionar a **Noctra Core**.\n` +
-      `Seus benefícios foram liberados no servidor.`
-    ).catch(() => {});
+await newMember.send({
+  embeds: [
+    new EmbedBuilder()
+      .setColor('#8b5cf6')
+      .setTitle('☾ Obrigada por impulsionar a Noctra Core')
+      .setDescription(
+        `Seu apoio fortalece a comunidade e ajuda a Noctra a continuar crescendo.\n\n` +
+        `A Umbra liberou seus benefícios automaticamente.`
+      )
+      .addFields({
+        name: '✦ Benefícios liberados',
+        value:
+          `🌙 Cargo Booster\n` +
+          `✨ Cargo VIP\n` +
+          `🖤 Círculo da Umbra\n` +
+          `🎁 Participação em sorteios\n` +
+          `📖 Prioridade em pedidos`
+      })
+      .setThumbnail(newMember.user.displayAvatarURL({ size: 1024 }))
+      .setImage(process.env.UMBRA_BANNER)
+      .setFooter({ text: 'Umbra • Sistema de Benefícios' })
+      .setTimestamp()
+  ]
+}).catch(() => {});
 
     return;
   }
@@ -173,20 +197,42 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
           new EmbedBuilder()
             .setColor('#ef4444')
             .setTitle('☾ Boost encerrado')
-            .setDescription(
-              `✦ Membro: ${newMember}\n` +
-              `✦ Benefícios removidos: Booster, VIP e Círculo da Umbra`
-            )
+.setDescription(
+  `✦ Membro: ${newMember}\n` +
+  `✦ ID: ${newMember.id}\n` +
+  `✦ Usuário: ${newMember.user.tag}\n` +
+  `✦ Boost encerrado\n` +
+  `✦ Benefícios removidos: Booster, VIP e Círculo da Umbra`
+)
+.setThumbnail(newMember.user.displayAvatarURL({ size: 1024 }))
+.setFooter({ text: 'Umbra • Logs de Boost' })
             .setTimestamp()
         ]
       });
     }
 
-    await newMember.send(
-      `☾ Seu boost na **Noctra Core** foi encerrado.\n\n` +
-      `A Umbra removeu seus benefícios automaticamente.\n` +
-      `Obrigada por ter apoiado a Noctra. 🌙`
-    ).catch(() => {});
+await newMember.send({
+  embeds: [
+    new EmbedBuilder()
+      .setColor('#ef4444')
+      .setTitle('☾ Boost encerrado')
+      .setDescription(
+        `Seu boost não está mais ativo.\n\n` +
+        `Os benefícios foram removidos automaticamente pela Umbra.`
+      )
+      .addFields({
+        name: '✦ Benefícios removidos',
+        value:
+          `🌙 Cargo Booster\n` +
+          `✨ Cargo VIP\n` +
+          `🖤 Círculo da Umbra`
+      })
+      .setThumbnail(newMember.user.displayAvatarURL({ size: 1024 }))
+      .setImage(process.env.UMBRA_BANNER)
+      .setFooter({ text: 'Umbra • Sistema de Benefícios' })
+      .setTimestamp()
+  ]
+}).catch(() => {});
 
     return;
   }
@@ -336,6 +382,8 @@ if (interaction.commandName === 'remover-teste-boost') {
 
   if (interaction.commandName === 'painel-beneficios') {
     const canalEscolhido = interaction.options.getChannel('canal') || interaction.channel;
+    const totalBoosts = interaction.guild.premiumSubscriptionCount || 0;
+const nivelBoost = interaction.guild.premiumTier || 0;
 
     const embed = new EmbedBuilder()
       .setColor('#8b5cf6')
@@ -359,11 +407,18 @@ if (interaction.commandName === 'remover-teste-boost') {
           value:
             `Depois de impulsionar o servidor, a **Umbra** entrega seus benefícios automaticamente.`,
           inline: false
-        }
+        },
+        {
+  name: '📊 Status Atual do Servidor',
+  value:
+    `🚀 Boosts ativos: **${totalBoosts}**\n` +
+    `⭐ Nível do servidor: **${nivelBoost}**`,
+  inline: false
+}
       )
-      .setFooter({ text: 'Umbra • Sistema de Benefícios da Noctra Core' })
-      .setTimestamp();
-
+.setImage(process.env.UMBRA_BANNER)
+.setFooter({ text: 'Umbra • Sistema de Benefícios da Noctra Core' })
+.setTimestamp();
     const botoes = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
         .setCustomId('beneficios_ver')
@@ -388,6 +443,24 @@ if (interaction.commandName === 'remover-teste-boost') {
       embeds: [embed],
       components: [botoes]
     });
+    const canalLogs = interaction.guild.channels.cache.get(process.env.LOG_CHANNEL_ID);
+
+if (canalLogs) {
+  await canalLogs.send({
+    embeds: [
+      new EmbedBuilder()
+        .setColor('#8b5cf6')
+        .setTitle('☾ Painel de benefícios enviado')
+        .setDescription(
+          `✦ Enviado por: ${interaction.user}\n` +
+          `✦ Canal: ${canalEscolhido}\n` +
+          `✦ Sistema: Benefícios Umbra`
+        )
+        .setThumbnail(interaction.user.displayAvatarURL({ size: 1024 }))
+        .setTimestamp()
+    ]
+  });
+}
     await interaction.reply({
       content: `Painel de benefícios enviado em ${canalEscolhido}.`,
       ephemeral: true
