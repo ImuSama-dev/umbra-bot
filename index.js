@@ -254,7 +254,24 @@ client.on('interactionCreate', async (interaction) => {
     content: '🔒 Fechando ticket em 5 segundos...',
     ephemeral: false
   });
+const canalLogs = interaction.guild.channels.cache.get(process.env.LOG_CHANNEL_ID);
 
+if (canalLogs) {
+  await canalLogs.send({
+    embeds: [
+      new EmbedBuilder()
+        .setColor('#ef4444')
+        .setTitle('🔒 Ticket Fechado')
+        .setDescription(
+          `✦ Fechado por: ${interaction.user}\n` +
+          `✦ Canal: ${interaction.channel.name}\n` +
+          `✦ Sistema: Umbra Tickets`
+        )
+        .setThumbnail(interaction.user.displayAvatarURL({ size: 1024 }))
+        .setTimestamp()
+    ]
+  });
+}
   setTimeout(async () => {
     await interaction.channel.delete().catch(() => {});
   }, 5000);
@@ -307,6 +324,7 @@ if (interaction.customId === 'ticket_booster') {
   const canal = await interaction.guild.channels.create({
     name: `booster-${interaction.user.username}`,
     type: ChannelType.GuildText,
+    parent: process.env.TICKET_CATEGORY_ID,
     permissionOverwrites: [
       {
         id: interaction.guild.id,
@@ -345,6 +363,24 @@ await canal.send({
   ],
   components: [botoesTicket]
 });
+  const canalLogs = interaction.guild.channels.cache.get(process.env.LOG_CHANNEL_ID);
+
+if (canalLogs) {
+  await canalLogs.send({
+    embeds: [
+      new EmbedBuilder()
+        .setColor('#22c55e')
+        .setTitle('🎫 Ticket Booster Aberto')
+        .setDescription(
+          `✦ Usuário: ${interaction.user}\n` +
+          `✦ Canal: ${canal}\n` +
+          `✦ Sistema: Umbra Tickets`
+        )
+        .setThumbnail(interaction.user.displayAvatarURL({ size: 1024 }))
+        .setTimestamp()
+    ]
+  });
+}
   await interaction.reply({
     content: `Seu ticket foi criado: ${canal}`,
     ephemeral: true
