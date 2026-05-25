@@ -324,7 +324,25 @@ client.on('interactionCreate', async (interaction) => {
       embeds: [embed],
       components: [botoes]
     });
+const canalLogs = interaction.guild.channels.cache.get(process.env.LOG_CHANNEL_ID);
 
+if (canalLogs) {
+  await canalLogs.send({
+    embeds: [
+      new EmbedBuilder()
+        .setColor('#ef4444')
+        .setTitle('☾ Teste de remoção de boost')
+        .setDescription(
+          `Os cargos de teste foram removidos.\n\n` +
+          `✦ Membro: ${membro}\n` +
+          `✦ Removidos: Booster, VIP e Apoiador VIP`
+        )
+        .setThumbnail(interaction.user.displayAvatarURL({ size: 1024 }))
+        .setFooter({ text: 'Umbra • Logs de Teste' })
+        .setTimestamp()
+    ]
+  });
+}
     await interaction.reply({
       content: `Painel de benefícios enviado em ${canalEscolhido}.`,
       ephemeral: true
