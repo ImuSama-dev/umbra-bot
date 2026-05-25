@@ -303,6 +303,7 @@ const embedTeste = new EmbedBuilder()
     name: '✦ Cargos entregues',
     value:
       `${cargoBooster ? cargoBooster : 'Booster não encontrado'}\n` +
+      `${cargoBoosterPlus ? cargoBoosterPlus : 'Booster Plus não encontrado'}\n` +
       `${cargoVip ? cargoVip : 'VIP não encontrado'}\n` +
       `${cargoApoiador ? cargoApoiador : 'Apoiador VIP não encontrado'}`,
     inline: false
@@ -368,7 +369,7 @@ if (interaction.commandName === 'remover-teste-boost') {
           .setDescription(
             `Os cargos de teste foram removidos.\n\n` +
             `✦ Membro: ${membro}\n` +
-            `✦ Removidos: Booster, VIP e Apoiador VIP`
+            `✦ Removidos: Booster, Booster Plus e VIP`
           )
           .setThumbnail(interaction.user.displayAvatarURL({ size: 1024 }))
           .setFooter({ text: 'Umbra • Logs de Teste' })
