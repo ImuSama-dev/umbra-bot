@@ -52,15 +52,28 @@ const commands = [
 client.once('clientReady', async () => {
   console.log(`🌙 ${client.user.tag} está online!`);
 
+const status = [
+  'os boosts da Noctra',
+  'o Círculo da Umbra',
+  'os benefícios dos apoiadores',
+  'a energia da comunidade'
+];
+
+let statusIndex = 0;
+
+setInterval(() => {
   client.user.setPresence({
     activities: [
       {
-        name: 'Observando os boosts da Noctra',
+        name: status[statusIndex],
         type: ActivityType.Watching
       }
     ],
     status: 'online'
   });
+
+  statusIndex = (statusIndex + 1) % status.length;
+}, 30000);
 
   const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
 
