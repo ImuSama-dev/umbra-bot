@@ -270,7 +270,47 @@ client.on('interactionCreate', async (interaction) => {
         ephemeral: true
       });
     }
+if (interaction.customId === 'ticket_booster') {
+  const cargoStaffId = process.env.STAFF_ROLE_ID;
 
+  const canal = await interaction.guild.channels.create({
+    name: `booster-${interaction.user.username}`,
+    type: ChannelType.GuildText,
+    permissionOverwrites: [
+      {
+        id: interaction.guild.id,
+        deny: ['ViewChannel']
+      },
+      {
+        id: interaction.user.id,
+        allow: ['ViewChannel', 'SendMessages', 'ReadMessageHistory']
+      },
+      {
+        id: cargoStaffId,
+        allow: ['ViewChannel', 'SendMessages', 'ReadMessageHistory']
+      }
+    ]
+  });
+
+  await canal.send({
+    embeds: [
+      new EmbedBuilder()
+        .setColor('#8b5cf6')
+        .setTitle('🎫 Ticket Booster')
+        .setDescription(
+          `${interaction.user}, bem-vindo ao seu ticket.\n\n` +
+          `Explique qual benefício deseja solicitar para a **Equipe Noctra**.`
+        )
+        .setFooter({ text: 'Umbra • Atendimento Booster' })
+        .setTimestamp()
+    ]
+  });
+
+  await interaction.reply({
+    content: `Seu ticket foi criado: ${canal}`,
+    ephemeral: true
+  });
+}
     return;
   }
 
@@ -387,6 +427,9 @@ if (interaction.commandName === 'remover-teste-boost') {
 }
 
   if (interaction.commandName === 'painel-beneficios') {
+    const boostersAtivos = interaction.guild.members.cache.filter(
+  member => member.premiumSince
+).size;
     const canalEscolhido = interaction.options.getChannel('canal') || interaction.channel;
     const totalBoosts = interaction.guild.premiumSubscriptionCount || 0;
 const nivelBoost = interaction.guild.premiumTier || 0;
@@ -414,37 +457,44 @@ const nivelBoost = interaction.guild.premiumTier || 0;
             `Depois de impulsionar o servidor, a **Umbra** entrega seus benefícios automaticamente.`,
           inline: false
         },
-        {
+{
   name: '📊 Status Atual do Servidor',
   value:
     `🚀 Boosts ativos: **${totalBoosts}**\n` +
-    `⭐ Nível do servidor: **${nivelBoost}**`,
+    `⭐ Nível do servidor: **${nivelBoost}**\n` +
+    `👥 Boosters ativos: **${boostersAtivos}**`,
   inline: false
 }
       )
 .setImage(process.env.UMBRA_BANNER)
 .setFooter({ text: 'Umbra • Sistema de Benefícios da Noctra Core' })
 .setTimestamp();
-    const botoes = new ActionRowBuilder().addComponents(
-      new ButtonBuilder()
-        .setCustomId('beneficios_ver')
-        .setLabel('Ver benefícios')
-        .setEmoji('🌙')
-        .setStyle(ButtonStyle.Secondary),
+const botoes = new ActionRowBuilder().addComponents(
+  new ButtonBuilder()
+    .setCustomId('beneficios_ver')
+    .setLabel('Ver benefícios')
+    .setEmoji('🌙')
+    .setStyle(ButtonStyle.Secondary),
 
-      new ButtonBuilder()
-        .setCustomId('beneficios_resgatar')
-        .setLabel('Como resgatar')
-        .setEmoji('✨')
-        .setStyle(ButtonStyle.Primary),
+  new ButtonBuilder()
+    .setCustomId('beneficios_resgatar')
+    .setLabel('Como resgatar')
+    .setEmoji('✨')
+    .setStyle(ButtonStyle.Primary),
 
-      new ButtonBuilder()
-        .setCustomId('beneficios_duvidas')
-        .setLabel('Dúvidas')
-        .setEmoji('🖤')
-        .setStyle(ButtonStyle.Secondary)
-    );
+  new ButtonBuilder()
+    .setCustomId('beneficios_duvidas')
+    .setLabel('Dúvidas')
+    .setEmoji('🖤')
+    .setStyle(ButtonStyle.Secondary),
 
+  new ButtonBuilder()
+    .setCustomId('ticket_booster')
+    .setLabel('Ticket Booster')
+    .setEmoji('🎫')
+    .setStyle(ButtonStyle.Success)
+);
+      
     await canalEscolhido.send({
       embeds: [embed],
       components: [botoes]
