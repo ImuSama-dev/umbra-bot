@@ -178,169 +178,7 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
     return;
   }
 });
-
 client.on('interactionCreate', async (interaction) => {
-  if (!interaction.isChatInputCommand()) return;
-    if (interaction.commandName === 'teste-boost') {
-      const membro = interaction.member;
-
-      const canalBoost = interaction.guild.channels.cache.get(process.env.BOOST_CHANNEL_ID);
-      const canalLogs = interaction.guild.channels.cache.get(process.env.LOG_CHANNEL_ID);
-
-      const cargoBooster = interaction.guild.roles.cache.get(process.env.BOOSTER_ROLE_ID);
-      const cargoVip = interaction.guild.roles.cache.get(process.env.VIP_ROLE_ID);
-      const cargoApoiador = interaction.guild.roles.cache.get(process.env.APOIADOR_ROLE_ID);
-
-      if (cargoBooster) await membro.roles.add(cargoBooster).catch(() => {});
-      if (cargoVip) await membro.roles.add(cargoVip).catch(() => {});
-      if (cargoApoiador) await membro.roles.add(cargoApoiador).catch(() => {});
-
-      const embed = new EmbedBuilder()
-        .setColor('#8b5cf6')
-        .setTitle('☾ Teste de Boost realizado')
-        .setDescription(
-          `${membro} simulou um boost na **Noctra Core**.\n\n` +
-          `A Umbra entregou os benefícios de teste com sucesso.`
-        )
-        .addFields({
-          name: '✦ Cargos entregues',
-          value:
-            `${cargoBooster ? cargoBooster : 'Booster não encontrado'}\n` +
-            `${cargoVip ? cargoVip : 'VIP não encontrado'}\n` +
-            `${cargoApoiador ? cargoApoiador : 'Apoiador não encontrado'}`,
-          inline: false
-        })
-        .setThumbnail(interaction.user.displayAvatarURL({ size: 1024 }))
-        .setFooter({ text: 'Umbra • Teste do Sistema de Boost' })
-        .setTimestamp();
-
-      if (canalBoost) {
-        await canalBoost.send({
-          content: `🌙 Teste de boost realizado por ${membro}.`,
-          embeds: [embed]
-        });
-      }
-      if (canalLogs) {
-        await canalLogs.send({
-          embeds: [
-            new EmbedBuilder()
-              .setColor('#22c55e')
-              .setTitle('☾ Log de teste de boost')
-              .setDescription(
-                `Um teste de boost foi executado.\n\n` +
-                `✦ Membro: ${membro}\n` +
-                `✦ Resultado: cargos entregues com sucesso.`
-              )
-              .setTimestamp()
-          ]
-        });
-      }
-
-      await interaction.reply({
-        content: '☾ Teste de boost concluído. Verifique os cargos, o canal de boost e o canal de logs.',
-        ephemeral: true
-      });
-    }
-if (interaction.commandName === 'remover-teste-boost') {
-
-  const membro = interaction.member;
-
-  const cargoBooster = interaction.guild.roles.cache.get(process.env.BOOSTER_ROLE_ID);
-  const cargoVip = interaction.guild.roles.cache.get(process.env.VIP_ROLE_ID);
-  const cargoApoiador = interaction.guild.roles.cache.get(process.env.APOIADOR_ROLE_ID);
-
-  if (cargoBooster) await membro.roles.remove(cargoBooster).catch(() => {});
-  if (cargoVip) await membro.roles.remove(cargoVip).catch(() => {});
-  if (cargoApoiador) await membro.roles.remove(cargoApoiador).catch(() => {});
-
-  const embed = new EmbedBuilder()
-    .setColor('#ef4444')
-    .setTitle('☾ Benefícios removidos')
-    .setDescription(`${membro} removeu os cargos de teste da Umbra.`)
-    .setTimestamp();
-
-  await interaction.reply({
-    embeds: [embed],
-    ephemeral: true
-  });
-
-  return;
-}
-    if (interaction.commandName === 'painel-beneficios') {
-      const canalEscolhido = interaction.options.getChannel('canal') || interaction.channel;
-
-      const cargoBooster = interaction.guild.roles.cache.get(process.env.BOOSTER_ROLE_ID);
-      const cargoVip = interaction.guild.roles.cache.get(process.env.VIP_ROLE_ID);
-      const cargoApoiador = interaction.guild.roles.cache.get(process.env.APOIADOR_ROLE_ID);
-
-      const embed = new EmbedBuilder()
-        .setColor('#8b5cf6')
-        .setTitle('☾ Benefícios da Noctra Core')
-        .setDescription(
-          `Impulsione a **Noctra Core** e ajude nossa comunidade a crescer.\n\n` +
-          `Quem apoia o servidor recebe benefícios especiais, cargos exclusivos e acesso a vantagens dentro da comunidade.`
-        )
-        .addFields(
-          {
-            name: '✦ Benefícios de Booster',
-            value:
-              `🌙 ${cargoBooster ? cargoBooster : 'Cargo especial de Booster'}\n` +
-              `✨ ${cargoVip ? cargoVip : 'Acesso VIP Noctra'}\n` +
-              `🖤 ${cargoApoiador ? cargoApoiador : 'Círculo da Umbra'}\n` +
-              `🎁 Participação em sorteios\n` +
-              `📖 Prioridade em pedidos\n` +
-              `🖤 Acesso a canais exclusivos`,
-            inline: false
-          },
-          {
-            name: '☾ Como funciona',
-            value:
-              `Depois de impulsionar o servidor, a **Umbra** entrega seus benefícios automaticamente.\n\n` +
-              `Se algo não aparecer, abra um ticket para a staff verificar.`,
-            inline: false
-          },
-          {
-            name: '✦ Observação',
-            value:
-              `Os benefícios ficam ativos enquanto o boost estiver ativo no servidor.`,
-            inline: false
-          }
-        )
-        .setFooter({ text: 'Umbra • Sistema de Benefícios da Noctra Core' })
-        .setTimestamp();
-
-      const botoes = new ActionRowBuilder().addComponents(
-        new ButtonBuilder()
-          .setCustomId('beneficios_ver')
-          .setLabel('Ver benefícios')
-          .setEmoji('🌙')
-          .setStyle(ButtonStyle.Secondary),
-
-        new ButtonBuilder()
-          .setCustomId('beneficios_resgatar')
-          .setLabel('Como resgatar')
-          .setEmoji('✨')
-          .setStyle(ButtonStyle.Primary),
-
-        new ButtonBuilder()
-          .setCustomId('beneficios_duvidas')
-          .setLabel('Dúvidas')
-          .setEmoji('🖤')
-          .setStyle(ButtonStyle.Secondary)
-      );
-
-      await canalEscolhido.send({
-        embeds: [embed],
-        components: [botoes]
-      });
-
-      await interaction.reply({
-        content: `Painel de benefícios enviado em ${canalEscolhido}.`,
-        ephemeral: true
-      });
-    }
-  }
-
   if (interaction.isButton()) {
     if (interaction.customId === 'beneficios_ver') {
       await interaction.reply({
@@ -360,7 +198,7 @@ if (interaction.commandName === 'remover-teste-boost') {
       await interaction.reply({
         content:
           `☾ Após impulsionar o servidor, a **Umbra** tenta entregar seus cargos automaticamente.\n\n` +
-          `Se os cargos não aparecerem, abra um ticket e envie um print do boost para a staff verificar.`,
+          `Se os cargos não aparecerem, abra um ticket para a staff verificar.`,
         ephemeral: true
       });
     }
@@ -372,6 +210,112 @@ if (interaction.commandName === 'remover-teste-boost') {
         ephemeral: true
       });
     }
+
+    return;
+  }
+
+  if (!interaction.isChatInputCommand()) return;
+
+  if (interaction.commandName === 'teste-boost') {
+    const membro = interaction.member;
+
+    const canalBoost = interaction.guild.channels.cache.get(process.env.BOOST_CHANNEL_ID);
+    const canalLogs = interaction.guild.channels.cache.get(process.env.LOG_CHANNEL_ID);
+
+    const cargoBooster = interaction.guild.roles.cache.get(process.env.BOOSTER_ROLE_ID);
+    const cargoVip = interaction.guild.roles.cache.get(process.env.VIP_ROLE_ID);
+    const cargoApoiador = interaction.guild.roles.cache.get(process.env.APOIADOR_ROLE_ID);
+
+    if (cargoBooster) await membro.roles.add(cargoBooster).catch(() => {});
+    if (cargoVip) await membro.roles.add(cargoVip).catch(() => {});
+    if (cargoApoiador) await membro.roles.add(cargoApoiador).catch(() => {});
+
+    await interaction.reply({
+      content: '☾ Teste de boost concluído. Verifique seus cargos.',
+      ephemeral: true
+    });
+
+    return;
+  }
+
+  if (interaction.commandName === 'remover-teste-boost') {
+    const membro = interaction.member;
+
+    const cargoBooster = interaction.guild.roles.cache.get(process.env.BOOSTER_ROLE_ID);
+    const cargoVip = interaction.guild.roles.cache.get(process.env.VIP_ROLE_ID);
+    const cargoApoiador = interaction.guild.roles.cache.get(process.env.APOIADOR_ROLE_ID);
+
+    if (cargoBooster) await membro.roles.remove(cargoBooster).catch(() => {});
+    if (cargoVip) await membro.roles.remove(cargoVip).catch(() => {});
+    if (cargoApoiador) await membro.roles.remove(cargoApoiador).catch(() => {});
+
+    await interaction.reply({
+      content: '☾ Cargos de teste removidos com sucesso.',
+      ephemeral: true
+    });
+
+    return;
+  }
+
+  if (interaction.commandName === 'painel-beneficios') {
+    const canalEscolhido = interaction.options.getChannel('canal') || interaction.channel;
+
+    const embed = new EmbedBuilder()
+      .setColor('#8b5cf6')
+      .setTitle('☾ Benefícios da Noctra Core')
+      .setDescription(
+        `Impulsione a **Noctra Core** e desbloqueie benefícios especiais dentro da comunidade.`
+      )
+      .addFields(
+        {
+          name: '✦ Benefícios',
+          value:
+            `🌙 Cargo especial de Booster\n` +
+            `✨ Acesso VIP Noctra\n` +
+            `🖤 Círculo da Umbra\n` +
+            `🎁 Participação em sorteios\n` +
+            `📖 Prioridade em pedidos`,
+          inline: false
+        },
+        {
+          name: '☾ Como funciona',
+          value:
+            `Depois de impulsionar o servidor, a **Umbra** entrega seus benefícios automaticamente.`,
+          inline: false
+        }
+      )
+      .setFooter({ text: 'Umbra • Sistema de Benefícios da Noctra Core' })
+      .setTimestamp();
+
+    const botoes = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setCustomId('beneficios_ver')
+        .setLabel('Ver benefícios')
+        .setEmoji('🌙')
+        .setStyle(ButtonStyle.Secondary),
+
+      new ButtonBuilder()
+        .setCustomId('beneficios_resgatar')
+        .setLabel('Como resgatar')
+        .setEmoji('✨')
+        .setStyle(ButtonStyle.Primary),
+
+      new ButtonBuilder()
+        .setCustomId('beneficios_duvidas')
+        .setLabel('Dúvidas')
+        .setEmoji('🖤')
+        .setStyle(ButtonStyle.Secondary)
+    );
+
+    await canalEscolhido.send({
+      embeds: [embed],
+      components: [botoes]
+    });
+
+    await interaction.reply({
+      content: `Painel de benefícios enviado em ${canalEscolhido}.`,
+      ephemeral: true
+    });
   }
 });
 
