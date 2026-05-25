@@ -241,6 +241,26 @@ await newMember.send({
 });
 client.on('interactionCreate', async (interaction) => {
   if (interaction.isButton()) {
+   if (interaction.customId === 'fechar_ticket') {
+
+  if (!interaction.member.roles.cache.has(process.env.STAFF_ROLE_ID)) {
+    return interaction.reply({
+      content: '❌ Apenas a Equipe Noctra pode fechar tickets.',
+      ephemeral: true
+    });
+  }
+
+  await interaction.reply({
+    content: '🔒 Fechando ticket em 5 segundos...',
+    ephemeral: false
+  });
+
+  setTimeout(async () => {
+    await interaction.channel.delete().catch(() => {});
+  }, 5000);
+
+  return;
+}
     if (interaction.customId === 'beneficios_ver') {
       await interaction.reply({
         content:
@@ -271,6 +291,17 @@ client.on('interactionCreate', async (interaction) => {
       });
     }
 if (interaction.customId === 'ticket_booster') {
+    const ticketExistente = interaction.guild.channels.cache.find(
+    c => c.name === `booster-${interaction.user.username}`
+  );
+
+  if (ticketExistente) {
+    return interaction.reply({
+      content: `Você já possui um ticket aberto: ${ticketExistente}`,
+      ephemeral: true
+    });
+  }
+  
   const cargoStaffId = process.env.STAFF_ROLE_ID;
 
   const canal = await interaction.guild.channels.create({
@@ -292,20 +323,28 @@ if (interaction.customId === 'ticket_booster') {
     ]
   });
 
-  await canal.send({
-    embeds: [
-      new EmbedBuilder()
-        .setColor('#8b5cf6')
-        .setTitle('🎫 Ticket Booster')
-        .setDescription(
-          `${interaction.user}, bem-vindo ao seu ticket.\n\n` +
-          `Explique qual benefício deseja solicitar para a **Equipe Noctra**.`
-        )
-        .setFooter({ text: 'Umbra • Atendimento Booster' })
-        .setTimestamp()
-    ]
-  });
+const botoesTicket = new ActionRowBuilder().addComponents(
+  new ButtonBuilder()
+    .setCustomId('fechar_ticket')
+    .setLabel('Fechar Ticket')
+    .setEmoji('🔒')
+    .setStyle(ButtonStyle.Danger)
+);
 
+await canal.send({
+  embeds: [
+    new EmbedBuilder()
+      .setColor('#8b5cf6')
+      .setTitle('🎫 Ticket Booster')
+      .setDescription(
+        `${interaction.user}, bem-vindo ao seu ticket.\n\n` +
+        `Explique qual benefício deseja solicitar para a **Equipe Noctra**.`
+      )
+      .setFooter({ text: 'Umbra • Atendimento Booster' })
+      .setTimestamp()
+  ],
+  components: [botoesTicket]
+});
   await interaction.reply({
     content: `Seu ticket foi criado: ${canal}`,
     ephemeral: true
