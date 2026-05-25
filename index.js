@@ -54,7 +54,7 @@ client.once('clientReady', async () => {
 
 const status = [
   'os boosts da Noctra',
-  'o Círculo da Umbra',
+  'o Booster Plus',
   'os benefícios dos apoiadores',
   'a energia da comunidade'
 ];
@@ -99,11 +99,14 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
   const cargoBooster = newMember.guild.roles.cache.get(process.env.BOOSTER_ROLE_ID);
   const cargoVip = newMember.guild.roles.cache.get(process.env.VIP_ROLE_ID);
   const cargoApoiador = newMember.guild.roles.cache.get(process.env.APOIADOR_ROLE_ID);
-
+  const cargoBoosterPlus = newMember.guild.roles.cache.get(process.env.BOOSTER_PLUS_ROLE_ID);
   if (!antesBoostava && agoraBoosta) {
     if (cargoBooster) await newMember.roles.add(cargoBooster).catch(() => {});
     if (cargoVip) await newMember.roles.add(cargoVip).catch(() => {});
     if (cargoApoiador) await newMember.roles.add(cargoApoiador).catch(() => {});
+    if (cargoBoosterPlus && newMember.guild.premiumSubscriptionCount >= 2) {
+  await newMember.roles.add(cargoBoosterPlus).catch(() => {});
+}
 
     const embed = new EmbedBuilder()
       .setColor('#8b5cf6')
@@ -121,7 +124,6 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
         value:
           `${cargoBooster ? cargoBooster : 'Cargo Booster Noctra'}\n` +
           `${cargoVip ? cargoVip : 'Cargo VIP Noctra'}\n` +
-          `${cargoApoiador ? cargoApoiador : 'Círculo da Umbra'}\n` +
           `Acesso a canais especiais\n` +
           `Prioridade em pedidos\n` +
           `Participação em sorteios futuros`,
@@ -149,7 +151,7 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
   `✦ ID: ${newMember.id}\n` +
   `✦ Usuário: ${newMember.user.tag}\n` +
   `✦ Boost detectado com sucesso\n` +
-  `✦ Cargos entregues: Booster, VIP e Círculo da Umbra`
+  `✦ Cargos entregues: Booster, Booster Plus e VIP`
 )
 .setThumbnail(newMember.user.displayAvatarURL({ size: 1024 }))
 .setFooter({ text: 'Umbra • Logs de Boost' })
@@ -171,8 +173,8 @@ await newMember.send({
         name: '✦ Benefícios liberados',
         value:
           `🌙 Cargo Booster\n` +
+           `🌑 Booster Plus\n` +
           `✨ Cargo VIP\n` +
-          `🖤 Círculo da Umbra\n` +
           `🎁 Participação em sorteios\n` +
           `📖 Prioridade em pedidos`
       })
@@ -202,7 +204,7 @@ await newMember.send({
   `✦ ID: ${newMember.id}\n` +
   `✦ Usuário: ${newMember.user.tag}\n` +
   `✦ Boost encerrado\n` +
-  `✦ Benefícios removidos: Booster, VIP e Círculo da Umbra`
+  `✦ Benefícios removidos: Booster, Booster Plus e VIP`
 )
 .setThumbnail(newMember.user.displayAvatarURL({ size: 1024 }))
 .setFooter({ text: 'Umbra • Logs de Boost' })
@@ -210,6 +212,7 @@ await newMember.send({
         ]
       });
     }
+if (cargoBoosterPlus) await newMember.roles.remove(cargoBoosterPlus).catch(() => {});
 
 await newMember.send({
   embeds: [
@@ -224,8 +227,8 @@ await newMember.send({
         name: '✦ Benefícios removidos',
         value:
           `🌙 Cargo Booster\n` +
-          `✨ Cargo VIP\n` +
-          `🖤 Círculo da Umbra`
+          `🌑 Booster Plus\n` +
+          `✨ Cargo VIP`
       })
       .setThumbnail(newMember.user.displayAvatarURL({ size: 1024 }))
       .setImage(process.env.UMBRA_BANNER)
@@ -233,7 +236,6 @@ await newMember.send({
       .setTimestamp()
   ]
 }).catch(() => {});
-
     return;
   }
 });
@@ -245,7 +247,6 @@ client.on('interactionCreate', async (interaction) => {
           `☾ **Benefícios de Booster da Noctra Core**\n\n` +
           `🌙 Cargo especial de Booster\n` +
           `✨ Cargo VIP Noctra\n` +
-          `🖤 Círculo da Umbra\n` +
           `🎁 Sorteios futuros\n` +
           `📖 Prioridade em pedidos\n` +
           `🖤 Canais exclusivos`,
@@ -284,10 +285,12 @@ client.on('interactionCreate', async (interaction) => {
     const cargoBooster = interaction.guild.roles.cache.get(process.env.BOOSTER_ROLE_ID);
     const cargoVip = interaction.guild.roles.cache.get(process.env.VIP_ROLE_ID);
     const cargoApoiador = interaction.guild.roles.cache.get(process.env.APOIADOR_ROLE_ID);
+    const cargoBoosterPlus = interaction.guild.roles.cache.get(process.env.BOOSTER_PLUS_ROLE_ID);
 
     if (cargoBooster) await membro.roles.add(cargoBooster).catch(() => {});
     if (cargoVip) await membro.roles.add(cargoVip).catch(() => {});
     if (cargoApoiador) await membro.roles.add(cargoApoiador).catch(() => {});
+    if (cargoBoosterPlus) await membro.roles.add(cargoBoosterPlus).catch(() => {});
 
 const embedTeste = new EmbedBuilder()
   .setColor('#8b5cf6')
@@ -349,10 +352,12 @@ if (interaction.commandName === 'remover-teste-boost') {
   const cargoBooster = interaction.guild.roles.cache.get(process.env.BOOSTER_ROLE_ID);
   const cargoVip = interaction.guild.roles.cache.get(process.env.VIP_ROLE_ID);
   const cargoApoiador = interaction.guild.roles.cache.get(process.env.APOIADOR_ROLE_ID);
+  const cargoBoosterPlus = interaction.guild.roles.cache.get(process.env.BOOSTER_PLUS_ROLE_ID);
 
   if (cargoBooster) await membro.roles.remove(cargoBooster).catch(() => {});
   if (cargoVip) await membro.roles.remove(cargoVip).catch(() => {});
   if (cargoApoiador) await membro.roles.remove(cargoApoiador).catch(() => {});
+  if (cargoBoosterPlus) await membro.roles.remove(cargoBoosterPlus).catch(() => {});
 
   if (canalLogs) {
     await canalLogs.send({
@@ -396,8 +401,8 @@ const nivelBoost = interaction.guild.premiumTier || 0;
           name: '✦ Benefícios',
           value:
             `🌙 Cargo especial de Booster\n` +
+            `🌑 Booster Plus\n` +
             `✨ Acesso VIP Noctra\n` +
-            `🖤 Círculo da Umbra\n` +
             `🎁 Participação em sorteios\n` +
             `📖 Prioridade em pedidos`,
           inline: false
