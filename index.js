@@ -243,14 +243,58 @@ client.on('interactionCreate', async (interaction) => {
     if (cargoVip) await membro.roles.add(cargoVip).catch(() => {});
     if (cargoApoiador) await membro.roles.add(cargoApoiador).catch(() => {});
 
-    await interaction.reply({
-      content: '☾ Teste de boost concluído. Verifique seus cargos.',
-      ephemeral: true
-    });
+const embedTeste = new EmbedBuilder()
+  .setColor('#8b5cf6')
+  .setTitle('☾ Teste de Boost realizado')
+  .setDescription(
+    `${membro} simulou um boost na **Noctra Core**.\n\n` +
+    `A Umbra entregou os benefícios de teste com sucesso.`
+  )
+  .addFields({
+    name: '✦ Cargos entregues',
+    value:
+      `${cargoBooster ? cargoBooster : 'Booster não encontrado'}\n` +
+      `${cargoVip ? cargoVip : 'VIP não encontrado'}\n` +
+      `${cargoApoiador ? cargoApoiador : 'Apoiador VIP não encontrado'}`,
+    inline: false
+  })
+  .setThumbnail(interaction.user.displayAvatarURL({ size: 1024 }))
+  .setFooter({ text: 'Umbra • Teste do Sistema de Boost' })
+  .setTimestamp();
 
-    return;
-  }
+if (canalBoost) {
+  await canalBoost.send({
+    content: `🌙 Teste de boost realizado por ${membro}.`,
+    embeds: [embedTeste]
+  });
+}
 
+if (canalLogs) {
+  await canalLogs.send({
+    embeds: [
+      new EmbedBuilder()
+        .setColor('#22c55e')
+        .setTitle('☾ Log de teste de boost')
+        .setDescription(
+          `Um teste de boost foi executado.\n\n` +
+          `✦ Membro: ${membro}\n` +
+          `✦ Resultado: cargos entregues\n` +
+          `✦ Sistema: Umbra Boost`
+        )
+        .setThumbnail(interaction.user.displayAvatarURL({ size: 1024 }))
+        .setFooter({ text: 'Umbra • Logs de Teste' })
+        .setTimestamp()
+    ]
+  });
+}
+
+await interaction.reply({
+  content: '☾ Teste de boost concluído. Verifique os cargos, o canal de boost e o canal de logs.',
+  ephemeral: true
+});
+
+return;
+}
   if (interaction.commandName === 'remover-teste-boost') {
     const membro = interaction.member;
 
