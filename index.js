@@ -40,7 +40,13 @@ const commands = [
   new SlashCommandBuilder()
     .setName('teste-boost')
     .setDescription('Testa o sistema de boost da Umbra')
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
+
+  new SlashCommandBuilder()
+    .setName('remover-teste-boost')
+    .setDescription('Remove os cargos de teste de boost')
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
+
 ].map(command => command.toJSON());
 
 client.once('clientReady', async () => {
@@ -174,7 +180,7 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
 });
 
 client.on('interactionCreate', async (interaction) => {
-  if (interaction.isChatInputCommand()) {
+  if (!interaction.isChatInputCommand()) return;
     if (interaction.commandName === 'teste-boost') {
       const membro = interaction.member;
 
@@ -214,7 +220,6 @@ client.on('interactionCreate', async (interaction) => {
           embeds: [embed]
         });
       }
-
       if (canalLogs) {
         await canalLogs.send({
           embeds: [
@@ -236,7 +241,31 @@ client.on('interactionCreate', async (interaction) => {
         ephemeral: true
       });
     }
+if (interaction.commandName === 'remover-teste-boost') {
 
+  const membro = interaction.member;
+
+  const cargoBooster = interaction.guild.roles.cache.get(process.env.BOOSTER_ROLE_ID);
+  const cargoVip = interaction.guild.roles.cache.get(process.env.VIP_ROLE_ID);
+  const cargoApoiador = interaction.guild.roles.cache.get(process.env.APOIADOR_ROLE_ID);
+
+  if (cargoBooster) await membro.roles.remove(cargoBooster).catch(() => {});
+  if (cargoVip) await membro.roles.remove(cargoVip).catch(() => {});
+  if (cargoApoiador) await membro.roles.remove(cargoApoiador).catch(() => {});
+
+  const embed = new EmbedBuilder()
+    .setColor('#ef4444')
+    .setTitle('☾ Benefícios removidos')
+    .setDescription(`${membro} removeu os cargos de teste da Umbra.`)
+    .setTimestamp();
+
+  await interaction.reply({
+    embeds: [embed],
+    ephemeral: true
+  });
+
+  return;
+}
     if (interaction.commandName === 'painel-beneficios') {
       const canalEscolhido = interaction.options.getChannel('canal') || interaction.channel;
 
