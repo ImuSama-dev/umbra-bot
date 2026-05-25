@@ -295,24 +295,44 @@ await interaction.reply({
 
 return;
 }
-  if (interaction.commandName === 'remover-teste-boost') {
-    const membro = interaction.member;
+if (interaction.commandName === 'remover-teste-boost') {
+  const membro = interaction.member;
 
-    const cargoBooster = interaction.guild.roles.cache.get(process.env.BOOSTER_ROLE_ID);
-    const cargoVip = interaction.guild.roles.cache.get(process.env.VIP_ROLE_ID);
-    const cargoApoiador = interaction.guild.roles.cache.get(process.env.APOIADOR_ROLE_ID);
+  const canalLogs = interaction.guild.channels.cache.get(process.env.LOG_CHANNEL_ID);
 
-    if (cargoBooster) await membro.roles.remove(cargoBooster).catch(() => {});
-    if (cargoVip) await membro.roles.remove(cargoVip).catch(() => {});
-    if (cargoApoiador) await membro.roles.remove(cargoApoiador).catch(() => {});
+  const cargoBooster = interaction.guild.roles.cache.get(process.env.BOOSTER_ROLE_ID);
+  const cargoVip = interaction.guild.roles.cache.get(process.env.VIP_ROLE_ID);
+  const cargoApoiador = interaction.guild.roles.cache.get(process.env.APOIADOR_ROLE_ID);
 
-    await interaction.reply({
-      content: '☾ Cargos de teste removidos com sucesso.',
-      ephemeral: true
+  if (cargoBooster) await membro.roles.remove(cargoBooster).catch(() => {});
+  if (cargoVip) await membro.roles.remove(cargoVip).catch(() => {});
+  if (cargoApoiador) await membro.roles.remove(cargoApoiador).catch(() => {});
+
+  if (canalLogs) {
+    await canalLogs.send({
+      embeds: [
+        new EmbedBuilder()
+          .setColor('#ef4444')
+          .setTitle('☾ Teste de remoção de boost')
+          .setDescription(
+            `Os cargos de teste foram removidos.\n\n` +
+            `✦ Membro: ${membro}\n` +
+            `✦ Removidos: Booster, VIP e Apoiador VIP`
+          )
+          .setThumbnail(interaction.user.displayAvatarURL({ size: 1024 }))
+          .setFooter({ text: 'Umbra • Logs de Teste' })
+          .setTimestamp()
+      ]
     });
-
-    return;
   }
+
+  await interaction.reply({
+    content: '☾ Cargos de teste removidos com sucesso.',
+    ephemeral: true
+  });
+
+  return;
+}
 
   if (interaction.commandName === 'painel-beneficios') {
     const canalEscolhido = interaction.options.getChannel('canal') || interaction.channel;
@@ -368,25 +388,6 @@ return;
       embeds: [embed],
       components: [botoes]
     });
-const canalLogs = interaction.guild.channels.cache.get(process.env.LOG_CHANNEL_ID);
-
-if (canalLogs) {
-  await canalLogs.send({
-    embeds: [
-      new EmbedBuilder()
-        .setColor('#ef4444')
-        .setTitle('☾ Teste de remoção de boost')
-        .setDescription(
-          `Os cargos de teste foram removidos.\n\n` +
-          `✦ Membro: ${membro}\n` +
-          `✦ Removidos: Booster, VIP e Apoiador VIP`
-        )
-        .setThumbnail(interaction.user.displayAvatarURL({ size: 1024 }))
-        .setFooter({ text: 'Umbra • Logs de Teste' })
-        .setTimestamp()
-    ]
-  });
-}
     await interaction.reply({
       content: `Painel de benefícios enviado em ${canalEscolhido}.`,
       ephemeral: true
