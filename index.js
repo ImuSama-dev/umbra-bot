@@ -3,8 +3,9 @@ const fs = require('fs');
 
 console.log("Iniciando Umbra...");
 
-const BOOST_CHANNEL_ID = String(process.env.BOOST_CHANNEL_ID || '').trim();
-const BENEFICIOS_CHANNEL_ID = String(process.env.BENEFICIOS_CHANNEL_ID || '').trim();
+// IDs públicos fixados para não depender de variáveis antigas da hospedagem.
+const BOOST_CHANNEL_ID = '1508223149164986599';
+const BENEFICIOS_CHANNEL_ID = '1508222440923463821';
 
 if (!BOOST_CHANNEL_ID) {
   throw new Error('BOOST_CHANNEL_ID não foi configurado no arquivo .env.');
