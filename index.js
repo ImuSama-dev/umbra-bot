@@ -43,26 +43,21 @@ const commands = [
     .setDescription('Testa o sistema de boost da Umbra')
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
 
-new SlashCommandBuilder()
-  .setName('teste-boost')
-  .setDescription('Testa o sistema de boost da Umbra')
-  .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
+  new SlashCommandBuilder()
+    .setName('remover-teste-boost')
+    .setDescription('Remove os cargos de teste de boost')
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
 
-new SlashCommandBuilder()
-  .setName('remover-teste-boost')
-  .setDescription('Remove os cargos de teste de boost')
-  .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
-
-new SlashCommandBuilder()
-  .setName('reenviar-boost')
-  .setDescription('Reenvia uma mensagem de boost')
-  .addUserOption(option =>
-    option
-      .setName('usuario')
-      .setDescription('Usuário que realizou o boost')
-      .setRequired(true)
-  )
-  .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
+  new SlashCommandBuilder()
+    .setName('reenviar-boost')
+    .setDescription('Reenvia uma mensagem de boost')
+    .addUserOption(option =>
+      option
+        .setName('usuario')
+        .setDescription('Usuário que realizou o boost')
+        .setRequired(true)
+    )
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
 
 ].map(command => command.toJSON());
 
