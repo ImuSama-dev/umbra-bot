@@ -1,7 +1,20 @@
-require('dotenv').config();
+require('dotenv').config({ override: true });
 const fs = require('fs');
 
 console.log("Iniciando Umbra...");
+
+const BOOST_CHANNEL_ID = String(process.env.BOOST_CHANNEL_ID || '').trim();
+const BENEFICIOS_CHANNEL_ID = String(process.env.BENEFICIOS_CHANNEL_ID || '').trim();
+
+if (!BOOST_CHANNEL_ID) {
+  throw new Error('BOOST_CHANNEL_ID não foi configurado no arquivo .env.');
+}
+
+if (BOOST_CHANNEL_ID === BENEFICIOS_CHANNEL_ID) {
+  throw new Error(
+    'BOOST_CHANNEL_ID e BENEFICIOS_CHANNEL_ID apontam para o mesmo canal.'
+  );
+}
 
 const {
   Client,
@@ -63,6 +76,23 @@ const commands = [
 
 client.once('clientReady', async () => {
   console.log(`🌙 ${client.user.tag} está online!`);
+
+  const guild = client.guilds.cache.get(process.env.GUILD_ID);
+  const canalBoostConfigurado = guild?.channels.cache.get(BOOST_CHANNEL_ID);
+  const canalBeneficiosConfigurado = guild?.channels.cache.get(BENEFICIOS_CHANNEL_ID);
+
+  console.log(
+    `Canal de boosts carregado: ${canalBoostConfigurado?.name || 'não encontrado'} (${BOOST_CHANNEL_ID})`
+  );
+  console.log(
+    `Canal de benefícios carregado: ${canalBeneficiosConfigurado?.name || 'não encontrado'} (${BENEFICIOS_CHANNEL_ID})`
+  );
+
+  if (!canalBoostConfigurado?.isTextBased()) {
+    throw new Error(
+      `BOOST_CHANNEL_ID inválido ou inacessível: ${BOOST_CHANNEL_ID}`
+    );
+  }
 
   const status = [
     'os boosts da Noctra',
@@ -198,7 +228,7 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
   const antesBoostava = oldMember.premiumSince;
   const agoraBoosta = newMember.premiumSince;
 
-  const canalBoost = newMember.guild.channels.cache.get(process.env.BOOST_CHANNEL_ID);
+  const canalBoost = newMember.guild.channels.cache.get(BOOST_CHANNEL_ID);
   const canalLogs = newMember.guild.channels.cache.get(process.env.LOG_CHANNEL_ID);
 
   const cargoBooster = newMember.guild.roles.cache.get(process.env.BOOSTER_ROLE_ID);
@@ -239,7 +269,7 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
       .setTimestamp();
 
     if (canalBoost) {
-      console.log('BOOST_CHANNEL_ID:', process.env.BOOST_CHANNEL_ID);
+      console.log('BOOST_CHANNEL_ID:', BOOST_CHANNEL_ID);
 console.log('Canal encontrado:', canalBoost?.name);
 console.log('Canal ID encontrado:', canalBoost?.id);
       await canalBoost.send({
@@ -503,7 +533,7 @@ if (canalLogs) {
   if (interaction.commandName === 'teste-boost') {
     const membro = interaction.member;
 
-    const canalBoost = interaction.guild.channels.cache.get(process.env.BOOST_CHANNEL_ID);
+    const canalBoost = interaction.guild.channels.cache.get(BOOST_CHANNEL_ID);
     const canalLogs = interaction.guild.channels.cache.get(process.env.LOG_CHANNEL_ID);
 
     const cargoBooster = interaction.guild.roles.cache.get(process.env.BOOSTER_ROLE_ID);
@@ -618,8 +648,15 @@ if (interaction.commandName === 'reenviar-boost') {
   const usuario = interaction.options.getUser('usuario');
 
   const canalBoost = interaction.guild.channels.cache.get(
-    process.env.BOOST_CHANNEL_ID
+    BOOST_CHANNEL_ID
   );
+
+  if (!canalBoost?.isTextBased()) {
+    return interaction.reply({
+      content: `❌ O canal de boosts não foi encontrado. ID carregado: ${BOOST_CHANNEL_ID}`,
+      ephemeral: true
+    });
+  }
 
   const cargoBooster = interaction.guild.roles.cache.get(
     process.env.BOOSTER_ROLE_ID
