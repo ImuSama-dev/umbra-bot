@@ -1,4 +1,5 @@
 require('dotenv').config();
+const fs = require('fs');
 
 console.log("Iniciando Umbra...");
 
@@ -88,15 +89,20 @@ setInterval(() => {
     console.log('Erro ao registrar comandos:', error);
   }
 });
-async function atualizarPainelBeneficios(guild) {
-  const canalBeneficios = guild.channels.cache.get(process.env.BENEFICIOS_CHANNEL_ID);
-  if (!canalBeneficios) return;
+const painelPath = './painel.json';
 
-  const mensagemPainel = await canalBeneficios.messages
-    .fetch(process.env.BENEFICIOS_MESSAGE_ID)
-    .catch(() => null);
+if (!fs.existsSync(painelPath)) return;
 
-  if (!mensagemPainel) return;
+const painelData = JSON.parse(fs.readFileSync(painelPath, 'utf8'));
+
+const canalBeneficios = guild.channels.cache.get(painelData.channelId);
+if (!canalBeneficios) return;
+
+const mensagemPainel = await canalBeneficios.messages
+  .fetch(painelData.messageId)
+  .catch(() => null);
+
+if (!mensagemPainel) return;
 
   const totalBoosts = guild.premiumSubscriptionCount || 0;
   const nivelBoost = guild.premiumTier || 0;
@@ -660,10 +666,45 @@ const botoes = new ActionRowBuilder().addComponents(
     .setStyle(ButtonStyle.Success)
 );
       
-    await canalEscolhido.send({
-      embeds: [embed],
-      components: [botoes]
-    });
+const mensagemPainel = await canalEscolhido.send({
+  embeds: [embed],
+  components: [botoes]
+});
+
+fs.writeFileSync(
+  './painel.json',
+  JSON.stringify(
+    {
+      channelId: canalEscolhido.id,
+      messageId: mensagemPainel.id
+    },
+    null,
+    2
+  )
+);
+
+fs.writeFileSync(
+  './painel.json',
+  JSON.stringify(
+    {
+      channelId: canalEscolhido.id,
+      messageId: mensagemPainel.id
+    },
+    null,
+    2
+  )
+);
+fs.writeFileSync(
+  './painel.json',
+  JSON.stringify(
+    {
+      channelId: canalEscolhido.id,
+      messageId: mensagemPainel.id
+    },
+    null,
+    2
+  )
+);
     const canalLogs = interaction.guild.channels.cache.get(process.env.LOG_CHANNEL_ID);
 
 if (canalLogs) {
