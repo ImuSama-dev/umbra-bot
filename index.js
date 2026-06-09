@@ -88,7 +88,92 @@ setInterval(() => {
     console.log('Erro ao registrar comandos:', error);
   }
 });
+async function atualizarPainelBeneficios(guild) {
+  const canalBeneficios = guild.channels.cache.get(process.env.BENEFICIOS_CHANNEL_ID);
+  if (!canalBeneficios) return;
 
+  const mensagemPainel = await canalBeneficios.messages
+    .fetch(process.env.BENEFICIOS_MESSAGE_ID)
+    .catch(() => null);
+
+  if (!mensagemPainel) return;
+
+  const totalBoosts = guild.premiumSubscriptionCount || 0;
+  const nivelBoost = guild.premiumTier || 0;
+
+  await guild.members.fetch();
+
+  const boostersAtivos = guild.members.cache.filter(
+    member => member.premiumSince
+  ).size;
+
+  const embedAtualizado = new EmbedBuilder()
+    .setColor('#8b5cf6')
+    .setTitle('☾ Benefícios da Noctra Core')
+    .setDescription(
+      `Impulsione a **Noctra Core** e desbloqueie benefícios especiais dentro da comunidade.`
+    )
+    .addFields(
+      {
+        name: '✦ Benefícios',
+        value:
+          `🌙 Cargo especial de Booster\n` +
+          `🌑 Booster Plus\n` +
+          `✨ Acesso VIP Noctra\n` +
+          `🎁 Participação em sorteios\n` +
+          `📖 Prioridade em pedidos`,
+        inline: false
+      },
+      {
+        name: '☾ Como funciona',
+        value:
+          `Depois de impulsionar o servidor, a **Umbra** entrega seus benefícios automaticamente.`,
+        inline: false
+      },
+      {
+        name: '📊 Status Atual do Servidor',
+        value:
+          `🚀 Boosts ativos: **${totalBoosts}**\n` +
+          `⭐ Nível do servidor: **${nivelBoost}**\n` +
+          `👥 Boosters ativos: **${boostersAtivos}**`,
+        inline: false
+      }
+    )
+    .setImage(process.env.UMBRA_BANNER)
+    .setFooter({ text: 'Umbra • Sistema de Benefícios da Noctra Core' })
+    .setTimestamp();
+
+  const botoes = new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setCustomId('beneficios_ver')
+      .setLabel('Ver benefícios')
+      .setEmoji('🌙')
+      .setStyle(ButtonStyle.Secondary),
+
+    new ButtonBuilder()
+      .setCustomId('beneficios_resgatar')
+      .setLabel('Como resgatar')
+      .setEmoji('✨')
+      .setStyle(ButtonStyle.Primary),
+
+    new ButtonBuilder()
+      .setCustomId('beneficios_duvidas')
+      .setLabel('Dúvidas')
+      .setEmoji('🖤')
+      .setStyle(ButtonStyle.Secondary),
+
+    new ButtonBuilder()
+      .setCustomId('ticket_booster')
+      .setLabel('Ticket Booster')
+      .setEmoji('🎫')
+      .setStyle(ButtonStyle.Success)
+  );
+
+  await mensagemPainel.edit({
+    embeds: [embedAtualizado],
+    components: [botoes]
+  });
+}
 client.on('guildMemberUpdate', async (oldMember, newMember) => {
   const antesBoostava = oldMember.premiumSince;
   const agoraBoosta = newMember.premiumSince;
@@ -184,7 +269,7 @@ await newMember.send({
       .setTimestamp()
   ]
 }).catch(() => {});
-
+await atualizarPainelBeneficios(newMember.guild);
     return;
   }
 
@@ -236,6 +321,7 @@ await newMember.send({
       .setTimestamp()
   ]
 }).catch(() => {});
+    await atualizarPainelBeneficios(newMember.guild);
     return;
   }
 });
@@ -457,6 +543,8 @@ await interaction.reply({
   content: '☾ Teste de boost concluído. Verifique os cargos, o canal de boost e o canal de logs.',
   ephemeral: true
 });
+    
+await atualizarPainelBeneficios(interaction.guild);
 
 return;
 }
@@ -497,7 +585,9 @@ if (interaction.commandName === 'remover-teste-boost') {
     content: '☾ Cargos de teste removidos com sucesso.',
     ephemeral: true
   });
-
+  
+await atualizarPainelBeneficios(interaction.guild);
+  
   return;
 }
 
