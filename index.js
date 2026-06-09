@@ -239,10 +239,10 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
       .setTimestamp();
 
     if (canalBoost) {
-      await canalBoost.send({
-        console.log('BOOST_CHANNEL_ID:', process.env.BOOST_CHANNEL_ID);
+      console.log('BOOST_CHANNEL_ID:', process.env.BOOST_CHANNEL_ID);
 console.log('Canal encontrado:', canalBoost?.name);
 console.log('Canal ID encontrado:', canalBoost?.id);
+      await canalBoost.send({
         content: `🌙 ${newMember}, obrigada pelo boost!`,
         embeds: [embed]
       });
