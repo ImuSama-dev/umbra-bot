@@ -53,28 +53,28 @@ const commands = [
 client.once('clientReady', async () => {
   console.log(`🌙 ${client.user.tag} está online!`);
 
-const status = [
-  'os boosts da Noctra',
-  'o Booster Plus',
-  'os benefícios dos apoiadores',
-  'a energia da comunidade'
-];
+  const status = [
+    'os boosts da Noctra',
+    'o Booster Plus',
+    'os benefícios dos apoiadores',
+    'a energia da comunidade'
+  ];
 
-let statusIndex = 0;
+  let statusIndex = 0;
 
-setInterval(() => {
-  client.user.setPresence({
-    activities: [
-      {
-        name: status[statusIndex],
-        type: ActivityType.Watching
-      }
-    ],
-    status: 'online'
-  });
+  setInterval(() => {
+    client.user.setPresence({
+      activities: [
+        {
+          name: status[statusIndex],
+          type: ActivityType.Watching
+        }
+      ],
+      status: 'online'
+    });
 
-  statusIndex = (statusIndex + 1) % status.length;
-}, 30000);
+    statusIndex = (statusIndex + 1) % status.length;
+  }, 30000);
 
   const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
 
@@ -89,20 +89,22 @@ setInterval(() => {
     console.log('Erro ao registrar comandos:', error);
   }
 });
-const painelPath = './painel.json';
 
-if (!fs.existsSync(painelPath)) return;
+async function atualizarPainelBeneficios(guild) {
+  const painelPath = './painel.json';
 
-const painelData = JSON.parse(fs.readFileSync(painelPath, 'utf8'));
+  if (!fs.existsSync(painelPath)) return;
 
-const canalBeneficios = guild.channels.cache.get(painelData.channelId);
-if (!canalBeneficios) return;
+  const painelData = JSON.parse(fs.readFileSync(painelPath, 'utf8'));
 
-const mensagemPainel = await canalBeneficios.messages
-  .fetch(painelData.messageId)
-  .catch(() => null);
+  const canalBeneficios = guild.channels.cache.get(painelData.channelId);
+  if (!canalBeneficios) return;
 
-if (!mensagemPainel) return;
+  const mensagemPainel = await canalBeneficios.messages
+    .fetch(painelData.messageId)
+    .catch(() => null);
+
+  if (!mensagemPainel) return;
 
   const totalBoosts = guild.premiumSubscriptionCount || 0;
   const nivelBoost = guild.premiumTier || 0;
@@ -180,6 +182,7 @@ if (!mensagemPainel) return;
     components: [botoes]
   });
 }
+
 client.on('guildMemberUpdate', async (oldMember, newMember) => {
   const antesBoostava = oldMember.premiumSince;
   const agoraBoosta = newMember.premiumSince;
@@ -671,29 +674,6 @@ const mensagemPainel = await canalEscolhido.send({
   components: [botoes]
 });
 
-fs.writeFileSync(
-  './painel.json',
-  JSON.stringify(
-    {
-      channelId: canalEscolhido.id,
-      messageId: mensagemPainel.id
-    },
-    null,
-    2
-  )
-);
-
-fs.writeFileSync(
-  './painel.json',
-  JSON.stringify(
-    {
-      channelId: canalEscolhido.id,
-      messageId: mensagemPainel.id
-    },
-    null,
-    2
-  )
-);
 fs.writeFileSync(
   './painel.json',
   JSON.stringify(
