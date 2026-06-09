@@ -45,6 +45,16 @@ const commands = [
 
   new SlashCommandBuilder()
     .setName('remover-teste-boost')
+  new SlashCommandBuilder()
+  .setName('reenviar-boost')
+  .setDescription('Reenvia uma mensagem de boost')
+  .addUserOption(option =>
+    option
+      .setName('usuario')
+      .setDescription('Usuário que realizou o boost')
+      .setRequired(true)
+  )
+  .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
     .setDescription('Remove os cargos de teste de boost')
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
 
@@ -599,7 +609,58 @@ await atualizarPainelBeneficios(interaction.guild);
   
   return;
 }
+if (interaction.commandName === 'reenviar-boost') {
 
+  const usuario = interaction.options.getUser('usuario');
+
+  const canalBoost = interaction.guild.channels.cache.get(
+    process.env.BOOST_CHANNEL_ID
+  );
+
+  const cargoBooster = interaction.guild.roles.cache.get(
+    process.env.BOOSTER_ROLE_ID
+  );
+
+  const cargoVip = interaction.guild.roles.cache.get(
+    process.env.VIP_ROLE_ID
+  );
+
+  const embed = new EmbedBuilder()
+    .setColor('#8b5cf6')
+    .setAuthor({
+      name: 'Novo Boost na Noctra Core',
+      iconURL: usuario.displayAvatarURL({ size: 1024 })
+    })
+    .setTitle('☾ A Noctra foi fortalecida')
+    .setDescription(
+      `<@${usuario.id}> impulsionou a **Noctra Core**.\n\n` +
+      `A Umbra reconheceu sua contribuição e liberou seus benefícios especiais.`
+    )
+    .addFields({
+      name: '✦ Benefícios liberados',
+      value:
+        `${cargoBooster || 'Cargo Booster'}\n` +
+        `${cargoVip || 'Cargo VIP'}\n` +
+        `Acesso a canais especiais\n` +
+        `Prioridade em pedidos\n` +
+        `Participação em sorteios futuros`
+    })
+    .setThumbnail(usuario.displayAvatarURL({ size: 1024 }))
+    .setFooter({ text: 'Umbra • Sistema de Benefícios' })
+    .setTimestamp();
+
+  await canalBoost.send({
+    content: `🌙 <@${usuario.id}>, obrigada pelo boost!`,
+    embeds: [embed]
+  });
+
+  await interaction.reply({
+    content: '☾ Mensagem de boost reenviada com sucesso.',
+    ephemeral: true
+  });
+
+  return;
+}
   if (interaction.commandName === 'painel-beneficios') {
     const boostersAtivos = interaction.guild.members.cache.filter(
   member => member.premiumSince
