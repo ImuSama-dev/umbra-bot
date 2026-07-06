@@ -236,49 +236,50 @@ client.on('guildMemberUpdate', async (oldMember, newMember) => {
   const cargoVip = newMember.guild.roles.cache.get(process.env.VIP_ROLE_ID);
   const cargoApoiador = newMember.guild.roles.cache.get(process.env.APOIADOR_ROLE_ID);
   const cargoBoosterPlus = newMember.guild.roles.cache.get(process.env.BOOSTER_PLUS_ROLE_ID);
-  if (!antesBoostava && agoraBoosta) {
-    if (cargoBooster) await newMember.roles.add(cargoBooster).catch(() => {});
-    if (cargoVip) await newMember.roles.add(cargoVip).catch(() => {});
-    if (cargoApoiador) await newMember.roles.add(cargoApoiador).catch(() => {});
-    if (cargoBoosterPlus && newMember.guild.premiumSubscriptionCount >= 2) {
-  await newMember.roles.add(cargoBoosterPlus).catch(() => {});
-}
+if (!antesBoostava && agoraBoosta) {
+  if (cargoBooster) await newMember.roles.add(cargoBooster).catch(() => {});
+  if (cargoVip) await newMember.roles.add(cargoVip).catch(() => {});
+  if (cargoApoiador) await newMember.roles.add(cargoApoiador).catch(() => {});
 
-    const embed = new EmbedBuilder()
-      .setColor('#8b5cf6')
-      .setAuthor({
-        name: 'Novo Boost na Noctra Core',
-        iconURL: newMember.user.displayAvatarURL({ size: 1024 })
-      })
-      .setTitle('☾ A Noctra foi fortalecida')
-      .setDescription(
-        `${newMember} impulsionou a **Noctra Core**.\n\n` +
-        `A Umbra reconheceu sua contribuição e liberou seus benefícios especiais.`
-      )
-      .addFields({
-        name: '✦ Benefícios liberados',
-        value:
-          `${cargoBooster ? cargoBooster : 'Cargo Booster Noctra'}\n` +
-          `${cargoVip ? cargoVip : 'Cargo VIP Noctra'}\n` +
-          `Acesso a canais especiais\n` +
-          `Prioridade em pedidos\n` +
-          `Participação em sorteios futuros`,
-        inline: false
-      })
-      .setThumbnail(newMember.user.displayAvatarURL({ size: 1024 }))
-      .setFooter({ text: 'Umbra • Sistema de Benefícios' })
-      .setTimestamp();
+  if (cargoBoosterPlus && newMember.guild.premiumSubscriptionCount >= 2) {
+    await newMember.roles.add(cargoBoosterPlus).catch(() => {});
+  }
 
-    if (canalBoost) {
-      console.log('BOOST_CHANNEL_ID:', BOOST_CHANNEL_ID);
-console.log('Canal encontrado:', canalBoost?.name);
-console.log('Canal ID encontrado:', canalBoost?.id);
-      await canalBoost.send({
-        content: `🌙 ${newMember}, obrigada pelo boost!`,
-        embeds: [embed]
-      });
-    }
+  const embed = new EmbedBuilder()
+    .setColor('#8b5cf6')
+    .setAuthor({
+      name: 'Novo Boost na Noctra Core',
+      iconURL: newMember.user.displayAvatarURL({ size: 1024 })
+    })
+    .setTitle('☾ A Noctra foi fortalecida')
+    .setDescription(
+      `${newMember} impulsionou a **Noctra Core**.\n\n` +
+      `A Umbra reconheceu sua contribuição e liberou seus benefícios especiais.`
+    )
+    .addFields({
+      name: '✦ Benefícios liberados',
+      value:
+        `${cargoBooster ? cargoBooster : 'Cargo Booster Noctra'}\n` +
+        `${cargoVip ? cargoVip : 'Cargo VIP Noctra'}\n` +
+        `Acesso a canais especiais\n` +
+        `Prioridade em pedidos\n` +
+        `Participação em sorteios futuros`,
+      inline: false
+    })
+    .setThumbnail(newMember.user.displayAvatarURL({ size: 1024 }))
+    .setFooter({ text: 'Umbra • Sistema de Benefícios' })
+    .setTimestamp();
 
+  if (canalBoost?.isTextBased()) {
+    console.log('BOOST_CHANNEL_ID:', BOOST_CHANNEL_ID);
+    console.log('Canal encontrado:', canalBoost.name);
+    console.log('Canal ID encontrado:', canalBoost.id);
+
+    await canalBoost.send({
+      content: `🌙 ${newMember}, obrigada pelo boost!`,
+      embeds: [embed]
+    });
+  }
     if (canalLogs) {
       await canalLogs.send({
         embeds: [
